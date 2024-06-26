@@ -1,64 +1,48 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
-import axios from 'axios';
 import Table from 'react-bootstrap/Table';
-import { useParams, Link } from 'react-router-dom';
 
 const PageComparar = () => {
-  const [videojuegoSeleccionado, setVideojuegoSeleccionado] = useState(null);
-  const [videojuegosMismoPrecio, setVideojuegosMismoPrecio] = useState([]);
-
-  const { id } = useParams();
+  const { gameID } = useParams();
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [samePriceGames, setSamePriceGames] = useState([]);
 
   useEffect(() => {
-    const fetchVideojuego = async () => {
+    const fetchGames = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/videojuegos/${id}`);
-        setVideojuegoSeleccionado(response.data);
-        compararConMismoPrecio(response.data);
+        const response = await axios.get(`http://localhost:5000/api/videojuegos/comparar/${gameID}`);
+        setSelectedGame(response.data.selectedGame);
+        setSamePriceGames(response.data.samePriceGames);
       } catch (error) {
-        console.error('¡Hubo un error al traer el videojuego seleccionado!', error);
+        console.error('Error fetching compared games:', error);
       }
     };
 
-    if (id) {
-      fetchVideojuego();
+    if (gameID) {
+      fetchGames();
     }
-  }, [id]);
-
-  const compararConMismoPrecio = (videojuego) => {
-    axios.get(`http://localhost:5000/api/videojuegos/comparar/${videojuego.precio}/${videojuego._id}`)
-      .then(response => {
-        if (Array.isArray(response.data)) {
-          setVideojuegosMismoPrecio(response.data);
-        } else {
-          setVideojuegosMismoPrecio([]);
-        }
-      })
-      .catch(error => {
-        console.error('¡Hubo un error al comparar los videojuegos por precio!', error);
-        setVideojuegosMismoPrecio([]);
-      });
-  };
+  }, [gameID]);
 
   return (
     <Container>
       <h1 className="text-center mt-4 mb-4">Comparar Videojuegos</h1>
-      {videojuegoSeleccionado && (
+      {selectedGame && (
         <Row>
           <Col md={6}>
             <Card className="mb-4">
               <Card.Body>
                 <div className='SubtitComparar'>
-                  <h5 >Videojuego Seleccionado</h5>
+                  <h5>Videojuego Seleccionado</h5>
                 </div>
-                <Card.Title>{videojuegoSeleccionado.nombre}</Card.Title>
-                <Card.Text>Año: {videojuegoSeleccionado.anno}</Card.Text>
-                <Card.Text>Precio: ${videojuegoSeleccionado.precio}</Card.Text>
-                <Card.Img src={videojuegoSeleccionado.imagen} />
+                <Card.Title>{selectedGame.title}</Card.Title>
+                <Card.Text>Año: {selectedGame.releaseDate}</Card.Text>
+                <Card.Text>Precio: ${selectedGame.salePrice}</Card.Text>
+                <Card.Img src={selectedGame.thumb} />
               </Card.Body>
             </Card>
           </Col>
@@ -68,7 +52,7 @@ const PageComparar = () => {
                 <div className='SubtitComparar'>
                   <h5>Videojuegos con el mismo Precio</h5>
                 </div>
-                {videojuegosMismoPrecio.length === 0 ? (
+                {samePriceGames.length === 0 ? (
                   <p>No hay videojuegos con el mismo precio.</p>
                 ) : (
                   <Table striped bordered responsive>
@@ -80,11 +64,11 @@ const PageComparar = () => {
                       </tr>
                     </thead>
                     <tbody style={{ textAlign: 'center' }}>
-                      {videojuegosMismoPrecio.map(videojuego => (
-                        <tr key={videojuego._id}>
-                          <td>{videojuego.nombre}</td>
-                          <td>{videojuego.anno}</td>
-                          <td>{videojuego.precio}</td>
+                      {samePriceGames.map(videojuego => (
+                        <tr key={videojuego.gameID}>
+                          <td>{videojuego.title}</td>
+                          <td>{videojuego.releaseDate}</td>
+                          <td>${videojuego.salePrice}</td>
                         </tr>
                       ))}
                     </tbody>

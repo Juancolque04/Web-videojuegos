@@ -1,9 +1,9 @@
 import './App.css';
 import PageInicio from '../pages/PageInicio';
-import PageCrud from '../pages/PageCrud';
 import Header from '../components/Header';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageComparar from '../pages/PageComparar';
+import PageBuscar from '../pages/PageBuscar';
 
 function App() {
   return (
@@ -12,8 +12,8 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<PageInicio />} />
-          <Route path="/crud" element={<PageCrud />} />
-          <Route path="/comparar/:id" element={<PageComparar />} />
+          <Route path="/buscar" element={<PageBuscar />} />
+          <Route path="/comparar/:gameID" element={<PageComparar />} /> 
         </Routes>
       </div>
     </Router>
